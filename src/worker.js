@@ -88,11 +88,15 @@ async function callTool(env, name, args) {
 async function getChannelInfo(env, args) {
   const channel = normalizeChannel(requiredString(args.channel, "channel"));
   const html = await fetchTelegramHtml(env, channel);
+  const title = firstText(html, /<div class="tgme_channel_info_header_title"[^>]*>([\s\S]*?)<\/div>/) || firstText(html, /<meta property="og:title" content="([^"]*)"/);
+  const subscriberCount = firstText(html, /<div class="tgme_channel_info_counter"[^>]*>([\s\S]*?)<\/div>/);
+  const hasChannelMarkers = html.includes("tgme_channel_info") || html.includes("tgme_widget_message");
+  if (!hasChannelMarkers || title === "Telegram – a new era of messaging") throw new Error(`Public channel not found: ${channel}`);
   return {
-    title: firstText(html, /<div class="tgme_channel_info_header_title"[^>]*>([\s\S]*?)<\/div>/) || firstText(html, /<meta property="og:title" content="([^"]*)"/),
+    title,
     description: firstText(html, /<div class="tgme_channel_info_description"[^>]*>([\s\S]*?)<\/div>/) || firstText(html, /<meta property="og:description" content="([^"]*)"/),
     avatarUrl: absoluteUrl(firstAttr(html, /<img class="tgme_page_photo_image"[^>]*src="([^"]+)"/), baseUrl(env)),
-    subscriberCount: firstText(html, /<div class="tgme_channel_info_counter"[^>]*>([\s\S]*?)<\/div>/),
+    subscriberCount,
     url: `${baseUrl(env)}/s/${channel}`,
     channel,
   };
@@ -106,6 +110,7 @@ async function getLatestPosts(env, args) {
   let url = `${baseUrl(env)}/s/${channel}`;
   if (beforePostId && Number.isFinite(beforePostId)) url += `?before=${beforePostId}`;
   const posts = parsePosts(await fetchUrl(url), channel)
+    .sort((a, b) => b.id - a.id)
     .filter((p) => beforeTime ? Date.parse(p.timestamp || "") < beforeTime : true)
     .slice(0, limit);
   return posts;
@@ -166,8 +171,14 @@ function requiredString(v, name) { if (typeof v !== "string" || !v.trim()) throw
 function clampLimit(v) { const n = v == null ? 10 : Number(v); return Math.max(1, Math.min(MAX_LIMIT, Number.isFinite(n) ? Math.floor(n) : 10)); }
 function normalizeChannel(input) {
   let s = input.trim();
-  s = s.replace(/^https?:\/\/(?:www\.)?t\.me\/s\//i, "").replace(/^https?:\/\/(?:www\.)?t\.me\//i, "").replace(/^@/, "");
-  s = s.split(/[/?#]/)[0];
+  if (/^https?:\/\/(?:www\.)?t\.me\/s\//i.test(s)) {
+    s = s.replace(/^https?:\/\/(?:www\.)?t\.me\/s\//i, "").split(/[/?#]/)[0];
+  } else if (/^https?:\/\/(?:www\.)?t\.me\//i.test(s)) {
+    s = s.replace(/^https?:\/\/(?:www\.)?t\.me\//i, "").split(/[/?#]/)[0];
+  } else {
+    s = s.replace(/^@/, "");
+    if (/[\/?#]/.test(s)) throw new Error("Invalid public channel username");
+  }
   if (!/^[A-Za-z0-9_]{3,64}$/.test(s)) throw new Error("Invalid public channel username");
   return s;
 }

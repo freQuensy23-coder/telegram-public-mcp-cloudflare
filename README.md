@@ -14,6 +14,13 @@ No Telegram API credentials are required. The server only fetches public web pag
 
 ## Endpoints
 
+Live Cloudflare deployment:
+
+- `GET https://telegram-public-mcp-cf.mametevalex.workers.dev/healthz` — health check.
+- `POST https://telegram-public-mcp-cf.mametevalex.workers.dev/mcp` — MCP JSON-RPC endpoint.
+
+Generic endpoints:
+
 - `GET /healthz` — health check.
 - `POST /mcp` — MCP JSON-RPC endpoint.
 
@@ -58,7 +65,7 @@ curl -s https://telegram-public-mcp-cf.<account>.workers.dev/mcp \
 ```yaml
 mcp_servers:
   telegram-public:
-    url: https://telegram-public-mcp-cf.<account>.workers.dev/mcp
+    url: https://telegram-public-mcp-cf.mametevalex.workers.dev/mcp
     timeout: 120
     connect_timeout: 60
 ```
