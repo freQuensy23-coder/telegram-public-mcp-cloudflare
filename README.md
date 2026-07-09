@@ -4,6 +4,20 @@ Public Telegram MCP server for Cloudflare Workers. It reads public Telegram chan
 
 No Telegram API credentials are required. The server only fetches public web pages.
 
+## Public hosted instance
+
+Anyone can use the deployed public MCP endpoint:
+
+```text
+https://telegram-public-mcp-cf.mametevalex.workers.dev/mcp
+```
+
+Health check:
+
+```text
+https://telegram-public-mcp-cf.mametevalex.workers.dev/healthz
+```
+
 ## Tools
 
 | Tool | Description |
