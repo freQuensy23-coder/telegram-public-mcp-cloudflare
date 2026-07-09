@@ -1,0 +1,14 @@
+{
+  "name": "telegram-public-mcp-cloudflare",
+  "version": "1.0.0",
+  "description": "Public Telegram channel MCP server on Cloudflare Workers",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4.90.0"
+  }
+}

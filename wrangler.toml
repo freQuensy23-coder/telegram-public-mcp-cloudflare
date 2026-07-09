@@ -1,0 +1,6 @@
+name = "telegram-public-mcp-cf"
+main = "src/worker.js"
+compatibility_date = "2026-07-09"
+
+[vars]
+TELEGRAM_BASE_URL = "https://t.me"
